@@ -23,6 +23,13 @@
 #define TOUCH_IOCTL_MAGIC_NUMBER 	't'
 #define TOUCH_IOCTL_IS_TOUCHED 		_IOWR(TOUCH_IOCTL_MAGIC_NUMBER, 0, int)
 
+// Buzzer Related
+#define BUZZER_MAJOR_NUMBER 		502
+#define BUZZER_MINOR_NUMBER 		100
+#define BUZZER_DEV_PATH_NAME 		"/dev/buzzer_ioctl"
+#define BUZZER_IOCTL_MAGIC_NUMBER 	'p'
+#define BUZZER_IOCTL_CMD_PLAY 		_IOWR(BUZZER_IOCTL_MAGIC_NUMBER, 0, int)
+#define BUZZER_IOCTL_CMD_STOP		_IOWR(BUZZER_IOCTL_MAGIC_NUMBER, 1, int)
 
 // LED Related
 #define LED_MAJOR_NUMBER 		504
@@ -54,15 +61,20 @@ int main(int argc, char **argv) {
 	
 	int touch_fd;
 	touch_fd = open_dev(TOUCH_MAJOR_NUMBER, TOUCH_MINOR_NUMBER, TOUCH_DEV_PATH_NAME);	
-	if(touch_fd < 0) { printf("Failed to open %s.\n", TOUCH_DEV_PATH_NAME); return -1; }
+	if(touch_fd < 0) { printf("Failed to open %s.\n", TOUCH_DEV_PATH_NAME); return -1; }	
 
+	// Initialize Buzzer
+	
+	int buzzer_fd;
+	buzzer_fd = open_dev(BUZZER_MAJOR_NUMBER, BUZZER_MINOR_NUMBER, BUZZER_DEV_PATH_NAME);	
+	if(buzzer_fd < 0) { printf("Failed to open %s.\n", BUZZER_DEV_PATH_NAME); return -1; }
+	
 	// Initialize LED
 	
 	int led_fd;
 	led_fd = open_dev(LED_MAJOR_NUMBER, LED_MINOR_NUMBER, LED_DEV_PATH_NAME);	
 	if(led_fd < 0) { printf("Failed to open %s.\n", LED_DEV_PATH_NAME); return -1; }
 	
-
 	while(true) {
 
 		int isTouched = 0;
@@ -70,6 +82,7 @@ int main(int argc, char **argv) {
 			printf("Angle : %d\n", angle);
 			ioctl(servo_fd, SERVO_IOCTL_CMD_ROTATE, &angle);
 			ioctl(touch_fd, TOUCH_IOCTL_IS_TOUCHED, &isTouched);
+			ioctl(buzzer_fd, BUZZER_IOCTL_CMD_PLAY, &angle);
 			printf("isTouched : %d\n", isTouched);
 
 			sleep(1);
