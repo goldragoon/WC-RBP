@@ -84,7 +84,7 @@ int servo_release(struct inode *inode, struct file *filep) {
 long servo_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 
 	int angle;
-	
+	printk(KERN_ALERT "servo_ioctl\n");	
 	switch(cmd) {
 
 		case SERVO_IOCTL_CMD_ROTATE:

@@ -25,15 +25,14 @@
 
 #define GPIO_TOUCH 14
 
-static void __iomem *gpio_base;
-volatile unsigned int *gpsel2;
-volatile unsigned int *gplev0;
+volatile unsigned int  *gpio_base, *gpio_gplev0;
 int dev_open(struct inode *inode, struct file *filep) {
 
 	printk(KERN_ALERT "[%s] driver open \n", TOUCH_DEV_NAME);
 
 	int size = 4 * 1024;
-	gpio_base = ioremap(GPIO_BASE_ADDR, size);	
+	gpio_base = (uint32_t *)ioremap(GPIO_BASE_ADDR, size);	
+	gpio_gplev0 = (uint32_t *)ioremap(GPIO_BASE_ADDR + GPLEV0, size);
 
 	int fsel = gpioToGPFSEL[GPIO_TOUCH];
 	int shift = gpioToShift[GPIO_TOUCH];
@@ -44,17 +43,16 @@ int dev_open(struct inode *inode, struct file *filep) {
 
 
 int dev_release(struct inode *inode, struct file *filep) {
-	printk(KERN_ALERT, "[%s] driver closed\n", TOUCH_DEVNAME);
+	printk(KERN_ALERT, "[%s] driver closed\n", TOUCH_DEV_NAME);
 	iounmap((void *)gpio_base);
 	return 0;
 }
 
 long dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
-		
+	int isTouched = 0;
 	switch(cmd) {
-		case TOUCH_IOCT_IS_TOUCHED:
-			int isTouched = 0;
-			if ((send_queue[send_front] & (1 << (send_bit))) != 0) isTouched = 1; 	
+		case TOUCH_IOCTL_IS_TOUCHED:
+			if((*(gpio_gplev0) & (1 << (GPIO_TOUCH & 31))) != 0) isTouched = 1;	
 			copy_to_user((const void*)arg, &isTouched, 4);
 			break;	
 	}
