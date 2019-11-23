@@ -17,7 +17,7 @@
 #define LED_DEV_NAME "led_ioctl" 
 
 #define GPIO_BASE_ADDR 0x3F200000
-#define GPFSEL1 0x04  // LED 
+#define GPFSEL0 0x00  // LED 
 
 #define GPLEV0 0x34 
 
@@ -29,7 +29,7 @@
 #define IOCTL_CMD_BLINK  _IOWR(IOCTL_MAGIC_NUMBER,1,int)
 
 static void __iomem *gpio_base;
-volatile unsigned int *gpsel1;
+volatile unsigned int *gpsel0;
 volatile unsigned int *gpset1;
 volatile unsigned int *gpclr1;
 volatile unsigned int *gplev0;
@@ -37,7 +37,7 @@ int led_open(struct inode *inode , struct file *filp){
 
   printk(KERN_ALERT "LED driver open!!\n");
   gpio_base = ioremap(GPIO_BASE_ADDR, 0x60);
-  gpsel1 = (volatile unsigned int *)(gpio_base + GPFSEL1);
+  gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0);
   gpset1 = (volatile unsigned int *)(gpio_base + GPSET0);
   gpclr1 = (volatile unsigned int *)(gpio_base + GPCLR0);
   gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
@@ -59,10 +59,10 @@ long led_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	    copy_from_user(&kbuf, (const void*)arg, 4);
 	    if(kbuf == 0 ){
               printk(KERN_ALERT "LED set direction in!!\n");
-	      *gpsel1 |= (0 << 24);
+	      *gpsel0 |= (0 << 15);
 	    } else if (kbuf == 1){
               printk(KERN_ALERT "LED set direction out!!\n");
-	      *gpsel1 |= (1 << 24);
+	      *gpsel0 |= (1 << 15);
 	    } else {
               printk(KERN_ALERT "ERROR direction parameter error\n");
 	      return -1;
@@ -73,10 +73,10 @@ long led_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	   copy_from_user(&kbuf, (const void*)arg, 4);
            if( arg == 1 ){
              printk(KERN_ALERT "LED OFF\n");
-	     *gpclr1 |= ( 1 << 18 );
+	     *gpclr1 |= ( 1 << 5 );
 	   } else {
              printk(KERN_ALERT "LED ON\n");
-	     *gpset1 |= ( 1 << 18 );
+	     *gpset1 |= ( 1 << 5 );
 	   }
 	   break;
   }
