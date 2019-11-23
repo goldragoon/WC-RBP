@@ -13,8 +13,8 @@
 #include <asm/io.h>
 #include <asm/uaccess.h>
 
-#define LED_MAJOR_NUMBER 503
-#define LED_DEV_NAME "pr_ioctl" 
+#define PR_MAJOR_NUMBER 503
+#define PR_DEV_NAME "pr_ioctl" 
 
 #define IOCTL_MAGIC_NUMBER 'k'
 #define IOCTL_CMD_SET_DIRECTION  _IOWR(IOCTL_MAGIC_NUMBER,0,int)
