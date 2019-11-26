@@ -35,7 +35,7 @@
 #define LED_MAJOR_NUMBER 		504
 #define LED_MINOR_NUMBER		100
 #define LED_DEV_PATH_NAME 		"/dev/led_ioctl"
-#define LED_IOCTL_MAGIC_NUMBER 	'm'
+#define LED_IOCTL_MAGIC_NUMBER 		'm'
 #define LED_IOCTL_IS_TOUCHED 		_IOWR(TOUCH_IOCTL_MAGIC_NUMBER, 0, int)
 
 int open_dev(int major_number, int minor_number, char *dev_path_name) {
