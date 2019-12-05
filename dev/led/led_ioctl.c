@@ -30,16 +30,16 @@
 
 static void __iomem *gpio_base;
 volatile unsigned int *gpsel0;
-volatile unsigned int *gpset1;
-volatile unsigned int *gpclr1;
+volatile unsigned int *gpset0;
+volatile unsigned int *gpclr0;
 volatile unsigned int *gplev0;
 int led_open(struct inode *inode , struct file *filp){
 
   printk(KERN_ALERT "LED driver open!!\n");
   gpio_base = ioremap(GPIO_BASE_ADDR, 0x60);
   gpsel0 = (volatile unsigned int *)(gpio_base + GPFSEL0);
-  gpset1 = (volatile unsigned int *)(gpio_base + GPSET0);
-  gpclr1 = (volatile unsigned int *)(gpio_base + GPCLR0);
+  gpset0 = (volatile unsigned int *)(gpio_base + GPSET0);
+  gpclr0 = (volatile unsigned int *)(gpio_base + GPCLR0);
   gplev0 = (volatile unsigned int *)(gpio_base + GPLEV0);
   return 0;
 }
@@ -73,10 +73,10 @@ long led_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	   copy_from_user(&kbuf, (const void*)arg, 4);
            if( arg == 1 ){
              printk(KERN_ALERT "LED OFF\n");
-	     *gpclr1 |= ( 1 << 5 );
+	     *gpclr0 |= ( 1 << 5 );
 	   } else {
              printk(KERN_ALERT "LED ON\n");
-	     *gpset1 |= ( 1 << 5 );
+	     *gpset0 |= ( 1 << 5 );
 	   }
 	   break;
   }
