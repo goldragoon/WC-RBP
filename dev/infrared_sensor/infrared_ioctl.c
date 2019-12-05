@@ -69,7 +69,6 @@ long infrared_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	    break;
 
     case IOCTL_CMD_BLINK:
-	   copy_from_user(&kbuf, (const void*)arg, 4);
 	   if(*gplev0 & ( 1 << 17)){
                 state = 1;
                 copy_to_user((const void*)arg, &state, 4);
@@ -78,7 +77,6 @@ long infrared_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
                 state = 0;
                 copy_to_user((const void*)arg, &state, 4);
 		printk(KERN_ALERT, "STATE ON\n");
-
 	   }
 	   break;
   }
