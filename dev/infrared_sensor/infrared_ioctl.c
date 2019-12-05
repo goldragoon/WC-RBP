@@ -110,3 +110,8 @@ void __exit infrared_exit(void){
 
 module_init(infrared_init);
 module_exit(infrared_exit);
+
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Do Hyung Kim");
+MODULE_DESCRIPTION("System Programming Final Project - Infrared Sensor");
