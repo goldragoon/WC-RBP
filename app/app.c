@@ -36,7 +36,17 @@
 #define LED_MINOR_NUMBER		100
 #define LED_DEV_PATH_NAME 		"/dev/led_ioctl"
 #define LED_IOCTL_MAGIC_NUMBER 		'm'
-#define LED_IOCTL_IS_TOUCHED 		_IOWR(TOUCH_IOCTL_MAGIC_NUMBER, 0, int)
+#define LED_IOCTL_CMD_SET_DIRECTION   _IOWR(LED_IOCTL_MAGIC_NUMBER, 0, int)
+#define LED_IOCTL_CMD_BLINK           _IOWR(LED_IOCTL_MAGIC_NUMBER, 1,int)
+
+
+// INFRARED Sensor Related
+#define INFRARED_MAJOR_NUMBER 		506
+#define INFRARED_MINOR_NUMBER		100
+#define INFRARED_DEV_PATH_NAME 		"/dev/infrared_ioctl"
+#define INFRARED_IOCTL_MAGIC_NUMBER 		'z'
+#define INFRARED_IOCTL_CMD_SET_DIRECTION   _IOWR(INFRARED_IOCTL_MAGIC_NUMBER, 0, int)
+#define INFRARED_IOCTL_CMD_BLINK           _IOWR(INFRARED_IOCTL_MAGIC_NUMBER, 1,int)
 
 int open_dev(int major_number, int minor_number, char *dev_path_name) {
 	dev_t dev;
@@ -69,12 +79,17 @@ int main(int argc, char **argv) {
 	buzzer_fd = open_dev(BUZZER_MAJOR_NUMBER, BUZZER_MINOR_NUMBER, BUZZER_DEV_PATH_NAME);	
 	if(buzzer_fd < 0) { printf("Failed to open %s.\n", BUZZER_DEV_PATH_NAME); return -1; }
 	
-	// Initialize LED
-	
+	// Initialize LED	
 	int led_fd;
 	led_fd = open_dev(LED_MAJOR_NUMBER, LED_MINOR_NUMBER, LED_DEV_PATH_NAME);	
 	if(led_fd < 0) { printf("Failed to open %s.\n", LED_DEV_PATH_NAME); return -1; }
-	
+
+
+	// Initialize INFRARED	
+        int infrared_fd;
+        infrared_fd = open_dev(INFRARED_MAJOR_NUMBER, INFRARED_MINOR_NUMBER, INFRARED_DEV_PATH_NAME);	
+        if(infrared_fd < 0) { printf("Failed to open %s.\n", INFRARED_DEV_PATH_NAME); return -1; }
+
 	while(true) {
 
 		int isTouched = 0;
