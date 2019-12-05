@@ -76,7 +76,7 @@ long infrared_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
            } else {
                 state = 0;
                 copy_to_user((const void*)arg, &state, 4);
-		printk(KERN_ALERT, "STATE ON\n");
+		printk(KERN_ALERT, "STATE OFF\n");
 	   }
 	   break;
   }
