@@ -1,0 +1,1 @@
+cmd_/home/pi/hcsr04/dev/sonar/sonar_ioctl.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pi/hcsr04/dev/sonar/sonar_ioctl.ko /home/pi/hcsr04/dev/sonar/sonar_ioctl.o /home/pi/hcsr04/dev/sonar/sonar_ioctl.mod.o ;  true
