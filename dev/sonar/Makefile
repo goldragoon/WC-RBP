@@ -1,4 +1,4 @@
-KERNEL_VER := 4.19.57-v7+
+KERNEL_VER := 4.19.66-v7+
 KERNEL_DIR = /lib/modules/$(KERNEL_VER)/build
 
 obj-m := sonar_ioctl.o

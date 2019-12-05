@@ -53,6 +53,7 @@ long dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 	switch(cmd) {
 		case TOUCH_IOCTL_IS_TOUCHED:
 			if((*(gpio_gplev0) & (1 << (GPIO_TOUCH & 31))) != 0) isTouched = 1;	
+			//printk(KERN_ALERT "isTouched : %d\n", isTouched);
 			copy_to_user((const void*)arg, &isTouched, 4);
 			break;	
 	}
