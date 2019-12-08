@@ -91,9 +91,6 @@ int isDark = 0;			// Photo resistor
 int isSomethingMoved = 0;	// Infrared
 unsigned int sonar_dists[SONAR_SENSOR_COUNT];
 
-int rc_time(int pr_fd);
-
-
 int open_dev(int major_number, int minor_number, char *dev_path_name) {
 	dev_t dev;
 	int fd;
@@ -237,9 +234,13 @@ void* infrared_start_routine(void *arg) {
 void* pr_start_routine(void *arg) {
 	
 	printf("pr_start_routine executed\n");
+	int count;
 	while(true) {
- 		int count = rc_time(pr_fd);
-		if(count > 300){
+		count = 0;
+		ioctl(pr_fd, PR_IOCTL_CMD_CHECK_LIGHT, &count);
+		if(count == -1){
+                  printf("Error\n");
+		} else if(count > 300){
                   printf("It's Dark. count = %d\n", count);
                 } else {
                   printf("It's Sunny. count = %d\n", count);
@@ -247,35 +248,3 @@ void* pr_start_routine(void *arg) {
 	}
 }
 
-int rc_time(int pr_fd){
-
-   int count = 0;
-   int pin_direction;
-   int init;
-   //Output on the pin for 
-   pin_direction = 1;
-   ioctl(pr_fd, PR_IOCTL_CMD_SET_DIRECTION, &pin_direction);
-   init = 0;
-   ioctl(pr_fd, PR_IOCTL_CMD_INITIATE,&init);
-   usleep(50000);
-
-   //Change the pin back to input
-   pin_direction = 0;
-   ioctl(pr_fd, PR_IOCTL_CMD_SET_DIRECTION, &pin_direction);
-
-   //Count until the pin goes high
-   int state = 0;
-   //clock_t start, end;
-   //start = clock();
-   while(true){
-     ioctl(pr_fd, PR_IOCTL_CMD_CHECK_LIGHT, &state);
-     if(state != 0){
-       break;
-     }
-     count += 1;
-   }
-   //end = clock();
-   //float ref = (float)(end - start)/CLOCKS_PER_SEC;
-   //printf("%.3f\n", ref);
-   return count;
-}

@@ -33,8 +33,9 @@ volatile unsigned int *gpsel2;
 volatile unsigned int *gpset0;
 volatile unsigned int *gpclr0;
 volatile unsigned int *gplev0;
-int pr_open(struct inode *inode , struct file *filp){
+int rc_time(void);
 
+int pr_open(struct inode *inode , struct file *filp){
   printk(KERN_ALERT "PR driver open!!\n");
   gpio_base = ioremap(GPIO_BASE_ADDR, 0x60);
   gpsel2 = (volatile unsigned int *)(gpio_base + GPFSEL2);
@@ -51,9 +52,8 @@ int pr_release(struct inode *inode , struct file *filp){
 }
 
 long pr_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
-
   int kbuf = -1;
-  int state = 0;
+  int count = 0;
   switch(cmd){
     case IOCTL_CMD_SET_DIRECTION:
 	    copy_from_user(&kbuf, (const void*)arg, 4);
@@ -62,7 +62,7 @@ long pr_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	      pinModeAlt(gpio_base, 22, FSEL_INPT);
 	    } else if (kbuf == 1){
               printk(KERN_ALERT "PR set direction out!!\n");
-	pinModeAlt(gpio_base, 22, FSEL_OUTP);
+	      pinModeAlt(gpio_base, 22, FSEL_OUTP);
 	      
 	    } else {
               printk(KERN_ALERT "ERROR direction parameter error\n");            return -1;
@@ -81,15 +81,9 @@ long pr_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	    }
 	    break;
     case IOCTL_CMD_CHECK_LIGHT:
-	    if(*gplev0 & (1 << 22)){
-                state = 1;
-                copy_to_user((const void*)arg, &state, 4);
-		printk(KERN_ALERT "High\n");
-            } else {
-                state = 0;
-                copy_to_user((const void*)arg, &state, 4);
-		printk(KERN_ALERT "Low\n");
-	    }
+	    count = rc_time();
+	    copy_to_user((const void*)arg, &count, 4);
+	    printk(KERN_ALERT "CHECK_LIGHT\n"); 
 	    break; 	    
   }
   return 0;
@@ -116,6 +110,40 @@ void __exit pr_exit(void){
   unregister_chrdev(PR_MAJOR_NUMBER, PR_DEV_NAME);
    printk(KERN_ALERT "PR driver exit done\n");
 
+}
+
+int rc_time(){
+
+   //Output on the pin for
+   printk(KERN_ALERT "PR set direction out!!\n");
+   pinModeAlt(gpio_base, 22, FSEL_OUTP);
+   printk(KERN_ALERT "PR initiate 0\n");
+   *gpclr0 |=  ( 1 << 22 );
+   ssleep(1);
+
+   //Change the pin back to input
+   printk(KERN_ALERT "PR set direction in!!\n");
+   pinModeAlt(gpio_base, 22, FSEL_INPT);
+
+   //Count until the pin goes high
+   int count = 0;
+   //clock_t start, end;
+   //start = clock();
+   while(true){
+     if(count > 10000){
+       return -1;
+     }
+     if(*gplev0 & (1 << 22)){
+       printk(KERN_ALERT "High\n");
+       break;
+     }
+     count += 1;
+     printk(KERN_ALERT "Low\n");  
+   }
+   //end = clock();
+   //float ref = (float)(end - start)/CLOCKS_PER_SEC;
+   //printf("%.3f\n", ref);
+   return count;
 }
 
 module_init(pr_init);
