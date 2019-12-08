@@ -83,14 +83,12 @@ int servo_release(struct inode *inode, struct file *filep) {
 
 long servo_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 
-	int angle;
-	printk(KERN_ALERT "servo_ioctl\n");	
+	int angle;	
 	switch(cmd) {
 
 		case SERVO_IOCTL_CMD_ROTATE:
 			copy_from_user(&angle, (const void*)arg, 4);
-			printk(KERN_ALERT "Rotate to %d degree\n", angle);
-
+			//printk(KERN_ALERT "Rotate to %d degree\n", angle);
 			*(pwm + gpioToPwmPort[GPIO_SERVO]) = angle;
 			break;
 	}

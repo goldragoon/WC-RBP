@@ -19,35 +19,24 @@
 #define SONAR_DEV_NAME "sonar_ioctl"
 #define SONAR_IOCTL_MAGIC_NUMBER 	'o'
 #define SONAR_IOCTL_READ_DIST 		_IOWR(SONAR_IOCTL_MAGIC_NUMBER, 0, int)
-#define GPIO_ECHO1 23
-#define GPIO_TRIG1 24
-#define GPIO_ECHO2 3
-#define GPIO_TRIG2 2
+#define SONAR_IOCTL_SET_TARGET 		_IOWR(SONAR_IOCTL_MAGIC_NUMBER, 1, int)
+#define SENSOR_COUNT 3
 
-int GPIO_ECHO[2] = {23, 3};
-int GPIO_TRIG[2] = {24, 2};
+int GPIO_ECHO[SENSOR_COUNT] = {23, 20, 19};
+int GPIO_TRIG[SENSOR_COUNT] = {24, 21, 26};
+
+int i;
+int sensor_num = 0;	
 volatile unsigned int *gpio_base, *gpio_gpset0;
-/*
-int dist(int usec) {
-	// return distance with mm
-	//((usec / 2.9) / 2)
-	//
-	// Integer division makes linking error
-	
-	return (((float)usec * 0.3448275) * 0.5);
-}
-*/
+
 int dev_open(struct inode *inode, struct file *filep) {
 	printk(KERN_ALERT "[%s] driver open \n", SONAR_DEV_NAME);
 
 	gpio_base = (uint32_t *)ioremap(GPIO_BASE_ADDR, 0x60);
-	
-	
-		pinModeAlt(gpio_base, GPIO_ECHO[0], FSEL_INPT);
-		pinModeAlt(gpio_base, GPIO_TRIG[0], FSEL_OUTP);
-		pinModeAlt(gpio_base, GPIO_ECHO[1], FSEL_INPT);
-		pinModeAlt(gpio_base, GPIO_TRIG[1], FSEL_OUTP);
-		
+	for(i = 0; i < SENSOR_COUNT; i++) {
+		pinModeAlt(gpio_base, GPIO_ECHO[i], FSEL_INPT);
+		pinModeAlt(gpio_base, GPIO_TRIG[i], FSEL_OUTP);
+	}
 	return 0;
 }
 
@@ -59,32 +48,30 @@ int dev_release(struct inode *inode, struct file *filep) {
 
 
 long dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+
 	
-	int  sensor_num;
 	unsigned int udelayed_high = 0, udelayed_low;
 	switch(cmd) {
+		case SONAR_IOCTL_SET_TARGET:
+			copy_from_user(&sensor_num, (const void*)arg, 4);
+			break;
+
 		case SONAR_IOCTL_READ_DIST:
-			printk(KERN_ALERT "SONAR_READ_DIST\n");
-			copy_from_user(&sensor_num,(const void*)arg,4);
-			printk(KERN_ALERT "sensor num : %d\n", sensor_num);
+			//printk(KERN_ALERT "SONAR_READ_DIST : %d\n", sensor_num);
 			digitalWrite(gpio_base, GPIO_TRIG[sensor_num], HIGH);
 			udelay(10);
-			digitalWrite(gpio_base, GPIO_TRIG[sensor_num], LOW);	
+			digitalWrite(gpio_base, GPIO_TRIG[sensor_num], LOW);
+	
 			udelayed_low = 0;	
-
-		while((digitalRead(gpio_base, GPIO_ECHO[sensor_num]) == LOW)) { 
+			while(digitalRead(gpio_base, GPIO_ECHO[sensor_num]) == LOW) { 
 				udelayed_low +=2; 
 				udelay(2);
 				if(udelayed_low > 10000) break;
 			}
 
 			udelayed_high = 0;			
-			printk(KERN_ALERT "sensor num : %d\n", sensor_num);
-			while((digitalRead(gpio_base, GPIO_ECHO[sensor_num]) == HIGH)) { udelayed_high += 2; udelay(2); }
-			printk(KERN_ALERT "udelayed (low, high) : (%u, %u)\n", udelayed_low, udelayed_high);
+			while(digitalRead(gpio_base, GPIO_ECHO[sensor_num]) == HIGH) {udelayed_high += 2; udelay(2); }	
 			copy_to_user((const void*)arg, &udelayed_high, 4);
-			printk(KERN_ALERT "4");
-			
 			break;	
 	}
 
@@ -117,5 +104,5 @@ module_init(dev_init);
 module_exit(dev_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("June Pyo Jung");
+MODULE_AUTHOR("Gyu Jin Choi");
 MODULE_DESCRIPTION("System Programming Final Project - Sonar Sensor");
