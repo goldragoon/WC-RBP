@@ -31,6 +31,16 @@
 #define BUZZER_IOCTL_CMD_PLAY 		_IOWR(BUZZER_IOCTL_MAGIC_NUMBER, 0, int)
 #define BUZZER_IOCTL_CMD_STOP		_IOWR(BUZZER_IOCTL_MAGIC_NUMBER, 1, int)
 
+// Photo Register Related 
+#define PR_MAJOR_NUMBER 		503
+#define PR_MINOR_NUMBER		        100
+#define PR_DEV_PATH_NAME 		"/dev/pr_ioctl"
+#define PR_IOCTL_MAGIC_NUMBER 		'k'
+#define PR_IOCTL_CMD_SET_DIRECTION   _IOWR(PR_IOCTL_MAGIC_NUMBER, 0, int)
+#define PR_IOCTL_CMD_INITIATE           _IOWR(PR_IOCTL_MAGIC_NUMBER, 1,int)
+#define PR_IOCTL_CMD_CHECK_LIGHT           _IOWR(PR_IOCTL_MAGIC_NUMBER, 2,int)
+
+
 // LED Related
 #define LED_MAJOR_NUMBER 		504
 #define LED_MINOR_NUMBER		100
@@ -47,6 +57,39 @@
 #define INFRARED_IOCTL_MAGIC_NUMBER 		'z'
 #define INFRARED_IOCTL_CMD_SET_DIRECTION   _IOWR(INFRARED_IOCTL_MAGIC_NUMBER, 0, int)
 #define INFRARED_IOCTL_CMD_BLINK           _IOWR(INFRARED_IOCTL_MAGIC_NUMBER, 1,int)
+
+int rc_time(int pr_fd){
+
+   int count = 0;
+   int pin_direction;
+   int init;
+   //Output on the pin for 
+   pin_direction = 1;
+   ioctl(pr_fd, PR_IOCTL_CMD_SET_DIRECTION, &pin_direction);
+   init = 0;
+   ioctl(pr_fd, PR_IOCTL_CMD_INITIATE,&init);
+   usleep(50000);
+
+   //Change the pin back to input
+   pin_direction = 0;
+   ioctl(pr_fd, PR_IOCTL_CMD_SET_DIRECTION, &pin_direction);
+
+   //Count until the pin goes high
+   int state = 0;
+   //clock_t start, end;
+   //start = clock();
+   while(true){
+     ioctl(pr_fd, PR_IOCTL_CMD_CHECK_LIGHT, &state);
+     if(state != 0){
+       break;
+     }
+     count += 1;
+   }
+   //end = clock();
+   //float ref = (float)(end - start)/CLOCKS_PER_SEC;
+   //printf("%.3f\n", ref);
+   return count;
+}
 
 int open_dev(int major_number, int minor_number, char *dev_path_name) {
 	dev_t dev;
@@ -84,12 +127,15 @@ int main(int argc, char **argv) {
 	led_fd = open_dev(LED_MAJOR_NUMBER, LED_MINOR_NUMBER, LED_DEV_PATH_NAME);	
 	if(led_fd < 0) { printf("Failed to open %s.\n", LED_DEV_PATH_NAME); return -1; }
 
-
 	// Initialize INFRARED	
         int infrared_fd;
         infrared_fd = open_dev(INFRARED_MAJOR_NUMBER, INFRARED_MINOR_NUMBER, INFRARED_DEV_PATH_NAME);	
         if(infrared_fd < 0) { printf("Failed to open %s.\n", INFRARED_DEV_PATH_NAME); return -1; }
 
+	// Initialize PR(Photo Register)
+        int pr_fd;
+        pr_fd = open_dev(PR_MAJOR_NUMBER, PR_MINOR_NUMBER, PR_DEV_PATH_NAME);	
+        if(pr_fd < 0) { printf("Failed to open %s.\n", PR_DEV_PATH_NAME); return -1; }
 	while(true) {
 
 		int isTouched = 0;
