@@ -24,9 +24,7 @@
 #define GPCLR0 0x28
 
 #define IOCTL_MAGIC_NUMBER 'k'
-#define IOCTL_CMD_SET_DIRECTION  _IOWR(IOCTL_MAGIC_NUMBER,0,int)
-#define IOCTL_CMD_INITIATE  _IOWR(IOCTL_MAGIC_NUMBER,1,int)
-#define IOCTL_CMD_CHECK_LIGHT  _IOWR(IOCTL_MAGIC_NUMBER,2,int)
+#define IOCTL_CMD_CHECK_LIGHT  _IOWR(IOCTL_MAGIC_NUMBER,0,int)
 
 static void __iomem *gpio_base;
 volatile unsigned int *gpsel2;
@@ -127,8 +125,6 @@ int rc_time(){
 
    //Count until the pin goes high
    int count = 0;
-   //clock_t start, end;
-   //start = clock();
    while(true){
      if(count > 10000){
        return -1;
@@ -140,9 +136,6 @@ int rc_time(){
      count += 1;
      printk(KERN_ALERT "Low\n");  
    }
-   //end = clock();
-   //float ref = (float)(end - start)/CLOCKS_PER_SEC;
-   //printf("%.3f\n", ref);
    return count;
 }
 

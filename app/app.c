@@ -46,9 +46,7 @@
 #define PR_MINOR_NUMBER		        100
 #define PR_DEV_PATH_NAME 		"/dev/pr_ioctl"
 #define PR_IOCTL_MAGIC_NUMBER 		'k'
-#define PR_IOCTL_CMD_SET_DIRECTION   _IOWR(PR_IOCTL_MAGIC_NUMBER, 0, int)
-#define PR_IOCTL_CMD_INITIATE           _IOWR(PR_IOCTL_MAGIC_NUMBER, 1,int)
-#define PR_IOCTL_CMD_CHECK_LIGHT           _IOWR(PR_IOCTL_MAGIC_NUMBER, 2,int)
+#define PR_IOCTL_CMD_CHECK_LIGHT           _IOWR(PR_IOCTL_MAGIC_NUMBER,0,int)
 
 
 // LED Related
@@ -220,19 +218,16 @@ void* sonar_start_routine(void *arg) {
 }
 
 void* infrared_start_routine(void *arg) {
-	printf("infrared_start_routine executed\n");
-	
+	printf("infrared_start_routine executed\n");	
 	int direction = 0;
 	ioctl(infrared_fd, INFRARED_IOCTL_CMD_SET_DIRECTION, &direction);
-	
 	while(true) {
 
 		ioctl(touch_fd, INFRARED_IOCTL_CMD_CHECK_MOVEMENT, &isSomethingMoved);
 		usleep(60000);
 	}
 }
-void* pr_start_routine(void *arg) {
-	
+void* pr_start_routine(void *arg) {	
 	printf("pr_start_routine executed\n");
 	int count;
 	while(true) {
