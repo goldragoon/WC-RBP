@@ -66,7 +66,7 @@ int servo_open(struct inode *inode, struct file *filep) {
 	msleep(150);
 
 	// Set pin as pwm mode (Using PWEN0 = enable, MODE0=0, MSEN0=Mark Space Mode)
-	*(pwm + PWM_CONTROL) = PWM0_ENABLE | PWM0_MS_MODE;
+	*(pwm + PWM_CONTROL) = PWM0_ENABLE | PWM0_MS_MODE | PWM1_ENABLE | PWM1_MS_MODE;
 	printk(KERN_ALERT "Default Clock Divisor : %d\n", *(clk + PWMCLK_DIV) >> 12);
 	pwmSetClock(192);
 	printk(KERN_ALERT "Default Clock Divisor : %d\n", *(clk + PWMCLK_DIV) >> 12);

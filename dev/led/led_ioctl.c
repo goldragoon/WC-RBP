@@ -72,7 +72,7 @@ long led_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 
     case IOCTL_CMD_BLINK:
 	   copy_from_user(&kbuf, (const void*)arg, 4);
-           if( kbuf == 1 ){
+           if( kbuf == 0 ){
              printk(KERN_ALERT "LED OFF\n");
 	     *gpclr1 |= ( 1 << 5 );
 	   } else {

@@ -104,5 +104,5 @@ module_init(dev_init);
 module_exit(dev_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Gyu Jin Choi");
+MODULE_AUTHOR("Jun Pyo Jung");
 MODULE_DESCRIPTION("System Programming Final Project - Sonar Sensor");

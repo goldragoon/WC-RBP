@@ -51,7 +51,7 @@ void pwmSetClock (int divisor)
 int servo_open(struct inode *inode, struct file *filep) {
 
 	int size = 4 * 1024;
-	printk(KERN_ALERT "Servo Driver Opened\n");
+	printk(KERN_ALERT "Buzzer Driver Opened\n");
 
 	gpio_base = (uint32_t *)ioremap(GPIO_BASE_ADDR, size);
 	pwm = (uint32_t *)ioremap(PWM_BASE_ADDR, size);
@@ -60,11 +60,12 @@ int servo_open(struct inode *inode, struct file *filep) {
 	// Set alternate function of GPIO BUZZER as ALT 5
 	int fsel = gpioToGPFSEL[GPIO_BUZZER];
 	int shift = gpioToShift[GPIO_BUZZER];
+
 	*(gpio_base + fsel) = (*(gpio_base + fsel) & ~(7 << shift)) | ((FSEL_ALT0 & 0x07) << shift);
 	msleep(150);
 
 	// Set pin as pwm mode (Using PWEN0 = enable, MODE0=0, MSEN0=Mark Space Mode)
-	*(pwm + PWM_CONTROL) = PWM1_ENABLE | PWM1_MS_MODE;
+	*(pwm + PWM_CONTROL) = PWM0_ENABLE | PWM0_MS_MODE | PWM1_ENABLE | PWM1_MS_MODE;	
 	printk(KERN_ALERT "Default Clock Divisor : %d\n", *(clk + PWMCLK_DIV) >> 12);
 	pwmSetClock(192);
 	printk(KERN_ALERT "Default Clock Divisor : %d\n", *(clk + PWMCLK_DIV) >> 12);
@@ -86,7 +87,7 @@ long servo_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
 
 		case BUZZER_IOCTL_CMD_PLAY:
 			copy_from_user(&note, (const void*)arg, 4);
-			printk(KERN_ALERT "[%s] Playing Note :%d\n", BUZZER_DEV_NAME, note);
+			//printk(KERN_ALERT "[%s] Playing Note :%d\n", BUZZER_DEV_NAME, note);
 
 			*(pwm + gpioToPwmPort[GPIO_BUZZER]) = note;
 

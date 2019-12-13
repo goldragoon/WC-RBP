@@ -72,11 +72,11 @@ long infrared_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
 	   if(*gplev0 & ( 1 << 17)){
                 state = 1;
                 copy_to_user((const void*)arg, &state, 4);
-		printk(KERN_ALERT "STATE ON\n");
+		printk(KERN_ALERT "INFRARED STATE ON\n");
            } else {
                 state = 0;
                 copy_to_user((const void*)arg, &state, 4);
-		printk(KERN_ALERT "STATE OFF\n");
+		printk(KERN_ALERT "INFRARED STATE OFF\n");
 	   }
 	   break;
   }

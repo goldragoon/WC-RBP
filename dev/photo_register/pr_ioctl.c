@@ -53,31 +53,7 @@ long pr_ioctl(struct file *flip, unsigned int cmd , unsigned long arg){
   int kbuf = -1;
   int count = 0;
   switch(cmd){
-    case IOCTL_CMD_SET_DIRECTION:
-	    copy_from_user(&kbuf, (const void*)arg, 4);
-	    if(kbuf == 0 ){
-              printk(KERN_ALERT "PR set direction in!!\n");
-	      pinModeAlt(gpio_base, 22, FSEL_INPT);
-	    } else if (kbuf == 1){
-              printk(KERN_ALERT "PR set direction out!!\n");
-	      pinModeAlt(gpio_base, 22, FSEL_OUTP);
-	      
-	    } else {
-              printk(KERN_ALERT "ERROR direction parameter error\n");            return -1;
-	    }
-	    break;
-    case IOCTL_CMD_INITIATE:
-	    copy_from_user(&kbuf, (const void*)arg, 4);
-	    if(kbuf == 0 ){
-              printk(KERN_ALERT "PR initiate 0\n");
-	      *gpclr0 |=  ( 1 << 22 );
-	    } else if (kbuf == 1){
-              printk(KERN_ALERT "PR initiate 1\n");
-	      *gpset0 |= (1 << 22);
-	    } else {
-              printk(KERN_ALERT "ERROR direction parameter error\n");            return -1;
-	    }
-	    break;
+
     case IOCTL_CMD_CHECK_LIGHT:
 	    count = rc_time();
 	    copy_to_user((const void*)arg, &count, 4);
@@ -104,6 +80,7 @@ int __init pr_init(void){
   }
   return 0;
 }
+
 void __exit pr_exit(void){
   unregister_chrdev(PR_MAJOR_NUMBER, PR_DEV_NAME);
    printk(KERN_ALERT "PR driver exit done\n");
@@ -126,15 +103,15 @@ int rc_time(){
    //Count until the pin goes high
    int count = 0;
    while(true){
-     if(count > 10000){
+     if(count > 100000000){
        return -1;
      }
      if(*gplev0 & (1 << 22)){
-       printk(KERN_ALERT "High\n");
+       //printk(KERN_ALERT "High\n");
        break;
      }
      count += 1;
-     printk(KERN_ALERT "Low\n");  
+     //printk(KERN_ALERT "Low\n");  
    }
    return count;
 }
